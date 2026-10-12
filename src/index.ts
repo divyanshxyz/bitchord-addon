@@ -23,7 +23,11 @@ const subsonic = new SubsonicClient({
 });
 
 // Initial library scan
-await flacLib.scan();
+try {
+  await flacLib.scan();
+} catch (err) {
+  console.warn('FLAC scan warning:', err);
+}
 
 function getHostBaseUrl(c: any): string {
   const forwardedProto = c.req.header('x-forwarded-proto') || 'http';
