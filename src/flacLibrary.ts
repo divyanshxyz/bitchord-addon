@@ -25,14 +25,7 @@ export class FlacLibraryManager {
   private artworkCache: Map<string, { buffer: Buffer; mime: string }> = new Map();
 
   constructor(musicDir: string) {
-    let resolved = path.resolve(musicDir);
-    if (!fs.existsSync(resolved)) {
-      const alt1 = path.join(process.cwd(), 'music');
-      const alt2 = path.resolve('../music');
-      if (fs.existsSync(alt1)) resolved = alt1;
-      else if (fs.existsSync(alt2)) resolved = alt2;
-    }
-    this.musicDir = resolved;
+    this.musicDir = path.resolve(musicDir);
     try {
       if (!fs.existsSync(this.musicDir)) {
         fs.mkdirSync(this.musicDir, { recursive: true });
@@ -105,6 +98,7 @@ export class FlacLibraryManager {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
+        if (['node_modules', '.git', '.vercel', 'dist'].includes(entry.name)) continue;
         results = results.concat(this.collectAudioFiles(fullPath));
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();

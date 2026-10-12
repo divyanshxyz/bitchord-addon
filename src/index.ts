@@ -23,10 +23,12 @@ const subsonic = new SubsonicClient({
 });
 
 // Initial library scan
-try {
-  await flacLib.scan();
-} catch (err) {
-  console.warn('FLAC scan warning:', err);
+if (!process.env.VERCEL) {
+  try {
+    await flacLib.scan();
+  } catch (err) {
+    console.warn('FLAC scan warning:', err);
+  }
 }
 
 function getHostBaseUrl(c: any): string {
