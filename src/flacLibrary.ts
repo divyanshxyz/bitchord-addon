@@ -25,7 +25,14 @@ export class FlacLibraryManager {
   private artworkCache: Map<string, { buffer: Buffer; mime: string }> = new Map();
 
   constructor(musicDir: string) {
-    this.musicDir = path.resolve(musicDir);
+    let resolved = path.resolve(musicDir);
+    if (!fs.existsSync(resolved)) {
+      const alt1 = path.join(process.cwd(), 'music');
+      const alt2 = path.resolve('../music');
+      if (fs.existsSync(alt1)) resolved = alt1;
+      else if (fs.existsSync(alt2)) resolved = alt2;
+    }
+    this.musicDir = resolved;
     try {
       if (!fs.existsSync(this.musicDir)) {
         fs.mkdirSync(this.musicDir, { recursive: true });

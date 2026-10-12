@@ -136,13 +136,12 @@ export async function resolveStream(songId: string, requestedQuality = 'lossless
     return null;
   }
 
-  const isLossless = normQuality === 'lossless';
   const result: BitChordStreamResponse = {
     url: tokenData.auth_url,
-    format: isLossless ? 'flac' : 'mp4',
+    format: 'mp4',
     quality: qualityLabel,
-    codec: isLossless ? 'flac' : 'aac',
-    container: isLossless ? 'flac' : 'mp4',
+    codec: 'aac',
+    container: 'mp4',
     manifest: 'none',
     encrypted: false,
     sampleRate: 44100,
