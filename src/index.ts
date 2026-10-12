@@ -64,7 +64,7 @@ app.get('/manifest.json', (c) => {
   };
 
   return c.json(manifest, 200, {
-    'Cache-Control': 'public, max-age=600',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
   });
 });
 
@@ -103,7 +103,7 @@ app.get('/search', async (c) => {
     results.push(...saavnMatches);
 
     return c.json({ tracks: results }, 200, {
-      'Cache-Control': 'public, max-age=600',
+      'Cache-Control': 'no-cache',
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Search resolution error';
@@ -128,7 +128,7 @@ app.get('/stream/:id', async (c) => {
     if (id.startsWith('flac_')) {
       const stream = flacLib.buildStreamResponse(id, baseUrl);
       if (stream) {
-        return c.json(stream, 200, { 'Cache-Control': 'public, max-age=300' });
+        return c.json(stream, 200, { 'Cache-Control': 'no-cache' });
       }
     }
 
@@ -136,7 +136,7 @@ app.get('/stream/:id', async (c) => {
     if (id.startsWith('subsonic_')) {
       const stream = await subsonic.resolveStream(id);
       if (stream) {
-        return c.json(stream, 200, { 'Cache-Control': 'public, max-age=300' });
+        return c.json(stream, 200, { 'Cache-Control': 'no-cache' });
       }
     }
 
@@ -156,7 +156,7 @@ app.get('/stream/:id', async (c) => {
             if (meta.atmos && atmos === 'auto') {
               stream.audioMode = 'DOLBY_ATMOS';
             }
-            return c.json(stream, 200, { 'Cache-Control': 'public, max-age=300' });
+            return c.json(stream, 200, { 'Cache-Control': 'no-cache' });
           }
         }
       }
@@ -168,7 +168,7 @@ app.get('/stream/:id', async (c) => {
       return c.json({ error: 'Track not found in catalogue' }, 404);
     }
 
-    return c.json(stream, 200, { 'Cache-Control': 'public, max-age=300' });
+    return c.json(stream, 200, { 'Cache-Control': 'no-cache' });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Stream resolution failed';
     return c.json({ error: message }, 500);
