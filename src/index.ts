@@ -261,21 +261,26 @@ app.get('/health', (c) => {
   });
 });
 
-// Start server
-console.log(`Starting BitChord Lossless FLAC Addon Server...`);
-console.log(`Addon Name: ${config.addonName}`);
-console.log(`Addon ID: ${config.addonId}`);
-console.log(`FLAC Directory: ${flacLib.getMusicDir()} (${flacLib.getTrackCount()} tracks loaded)`);
-console.log(`Lossless Gate: ${config.checkValidLossless === 1 ? 'Enabled (Requires LDAC / DAC)' : 'Disabled'}`);
+// Start server (when not running serverless on Vercel)
+if (!process.env.VERCEL) {
+  console.log(`Starting BitChord Lossless FLAC Addon Server...`);
+  console.log(`Addon Name: ${config.addonName}`);
+  console.log(`Addon ID: ${config.addonId}`);
+  console.log(`FLAC Directory: ${flacLib.getMusicDir()} (${flacLib.getTrackCount()} tracks loaded)`);
+  console.log(`Lossless Gate: ${config.checkValidLossless === 1 ? 'Enabled (Requires LDAC / DAC)' : 'Disabled'}`);
 
-serve(
-  {
-    fetch: app.fetch,
-    port: config.port,
-    hostname: config.host,
-  },
-  (info) => {
-    console.log(`🚀 BitChord Lossless Addon listening on http://${info.address}:${info.port}`);
-    console.log(`📦 Manifest URL: http://${info.address}:${info.port}/manifest.json`);
-  }
-);
+  serve(
+    {
+      fetch: app.fetch,
+      port: config.port,
+      hostname: config.host,
+    },
+    (info) => {
+      console.log(`🚀 BitChord Lossless Addon listening on http://${info.address}:${info.port}`);
+      console.log(`📦 Manifest URL: http://${info.address}:${info.port}/manifest.json`);
+    }
+  );
+}
+
+export default app;
+export { app };
