@@ -26,8 +26,12 @@ export class FlacLibraryManager {
 
   constructor(musicDir: string) {
     this.musicDir = path.resolve(musicDir);
-    if (!fs.existsSync(this.musicDir)) {
-      fs.mkdirSync(this.musicDir, { recursive: true });
+    try {
+      if (!fs.existsSync(this.musicDir)) {
+        fs.mkdirSync(this.musicDir, { recursive: true });
+      }
+    } catch {
+      // Read-only filesystem in serverless environments (Vercel)
     }
   }
 
