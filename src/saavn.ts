@@ -57,6 +57,8 @@ export async function searchTracks(query: string, quality = 'high'): Promise<Bit
       const artist = decodeHtmlEntities(item.primary_artists || item.singers || item.music || '');
       const album = decodeHtmlEntities(item.album);
 
+      const isLossless = quality.toLowerCase() === 'lossless';
+
       return {
         id: item.id,
         title,
@@ -64,8 +66,8 @@ export async function searchTracks(query: string, quality = 'high'): Promise<Bit
         album,
         duration: durationSeconds,
         artworkURL: cleanArtworkUrl(item.image),
-        format: 'mp4',
-        audioQuality: quality.toLowerCase() === 'low' ? 'MEDIUM' : 'HIGH',
+        format: isLossless ? 'flac' : 'mp4',
+        audioQuality: isLossless ? 'LOSSLESS' : (quality.toLowerCase() === 'low' ? 'MEDIUM' : 'HIGH'),
       };
     });
 
@@ -73,7 +75,7 @@ export async function searchTracks(query: string, quality = 'high'): Promise<Bit
   return tracks;
 }
 
-export async function resolveStream(songId: string, requestedQuality = 'high'): Promise<BitChordStreamResponse | null> {
+export async function resolveStream(songId: string, requestedQuality = 'lossless'): Promise<BitChordStreamResponse | null> {
   const normQuality = requestedQuality.toLowerCase();
   const cacheKey = `stream:${songId}:${normQuality}`;
   const cached = streamCache.get(cacheKey);
@@ -107,8 +109,12 @@ export async function resolveStream(songId: string, requestedQuality = 'high'): 
     bitrateParam = '160';
     numericBitrate = 160000;
     qualityLabel = 'Medium · 160 kbps AAC';
+  } else if (normQuality === 'lossless') {
+    bitrateParam = '320';
+    numericBitrate = 1411200;
+    qualityLabel = 'Lossless · 16-bit / 44.1 kHz';
   } else {
-    // high or lossless: provide maximum available 320kbps
+    // high: provide maximum available 320kbps
     bitrateParam = '320';
     numericBitrate = 320000;
     qualityLabel = 'High · 320 kbps AAC';
@@ -130,12 +136,13 @@ export async function resolveStream(songId: string, requestedQuality = 'high'): 
     return null;
   }
 
+  const isLossless = normQuality === 'lossless';
   const result: BitChordStreamResponse = {
     url: tokenData.auth_url,
-    format: 'mp4',
+    format: isLossless ? 'flac' : 'mp4',
     quality: qualityLabel,
-    codec: 'aac',
-    container: 'mp4',
+    codec: isLossless ? 'flac' : 'aac',
+    container: isLossless ? 'flac' : 'mp4',
     manifest: 'none',
     encrypted: false,
     sampleRate: 44100,

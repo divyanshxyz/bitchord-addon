@@ -55,9 +55,9 @@ app.get('/manifest.json', (c) => {
         type: 'select',
         default: 'lossless',
         options: [
-          { label: 'Lossless (Bit-exact FLAC)', value: 'lossless' },
-          { label: 'High (320 kbps AAC)', value: 'high' },
-          { label: 'Low (96 kbps AAC)', value: 'low' },
+          { label: 'Lossless', value: 'lossless' },
+          { label: 'High', value: 'high' },
+          { label: 'Low', value: 'low' },
         ],
       },
     ],
@@ -71,7 +71,8 @@ app.get('/manifest.json', (c) => {
 // 2. BitChord Search Endpoint
 app.get('/search', async (c) => {
   const query = c.req.query('q') || '';
-  const quality = c.req.query('quality') || 'lossless';
+  const rawQuality = c.req.query('quality') || 'lossless';
+  const quality = rawQuality.toLowerCase();
   const baseUrl = getHostBaseUrl(c);
 
   if (!query.trim()) {
@@ -113,7 +114,9 @@ app.get('/search', async (c) => {
 // 3. BitChord Stream Endpoint
 app.get('/stream/:id', async (c) => {
   const id = c.req.param('id');
-  const quality = c.req.query('quality') || 'lossless';
+  const rawQuality = c.req.query('quality') || 'lossless';
+  const quality = rawQuality.toLowerCase();
+  const atmos = c.req.query('atmos') || '';
   const baseUrl = getHostBaseUrl(c);
 
   if (!id) {
@@ -142,11 +145,17 @@ app.get('/stream/:id', async (c) => {
       const rawId = id.replace(/^tidal_/, '');
       const meta = getTidalCachedTrack(id) || (await fetchTidalTrackDetails(rawId));
       if (meta) {
-        const query = `${meta.title} ${meta.artist}`.trim();
-        const matches = await searchSaavn(query, quality);
+        // First try query with title + primary artist, then title only
+        let matches = await searchSaavn(`${meta.title} ${meta.artist}`.trim(), quality);
+        if (matches.length === 0) {
+          matches = await searchSaavn(meta.title, quality);
+        }
         if (matches.length > 0) {
           const stream = await resolveSaavn(matches[0].id, quality);
           if (stream) {
+            if (meta.atmos && atmos === 'auto') {
+              stream.audioMode = 'DOLBY_ATMOS';
+            }
             return c.json(stream, 200, { 'Cache-Control': 'public, max-age=300' });
           }
         }

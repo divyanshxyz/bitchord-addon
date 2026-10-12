@@ -1,7 +1,7 @@
 import { BitChordTrack } from './types.js';
 
 const TIDAL_SEARCH_URL = 'https://listen.tidal.com/v1/search';
-const TIDAL_TRACK_URL = 'https://listen.tidal.com/v1/tracks';
+const TIDAL_TRACK_URL = 'https://api.tidal.com/v1/tracks';
 const TIDAL_PUBLIC_TOKEN = '49YxDN9a2aFV6RTG';
 const TIDAL_RESOURCES_BASE = 'https://resources.tidal.com/images';
 
@@ -9,6 +9,8 @@ export interface TidalTrackMeta {
   title: string;
   artist: string;
   duration: number;
+  audioModes?: string[];
+  atmos?: boolean;
 }
 
 const tidalMetadataCache = new Map<string, TidalTrackMeta>();
@@ -33,10 +35,15 @@ export async function fetchTidalTrackDetails(rawId: string): Promise<TidalTrackM
 
     const item = await res.json();
     const artists = (item.artists || []).map((a: any) => a.name).join(', ');
+    const audioModes: string[] = item.audioModes || [];
+    const isAtmos = audioModes.includes('DOLBY_ATMOS');
+
     const meta: TidalTrackMeta = {
       title: item.title,
       artist: artists || item.artist?.name || '',
       duration: Number(item.duration) || 0,
+      audioModes,
+      atmos: isAtmos,
     };
 
     tidalMetadataCache.set(`tidal_${rawId}`, meta);
@@ -71,7 +78,6 @@ export async function searchTidal(
     const items = data.tracks?.items || [];
 
     return items.map((item: any) => {
-      const isLossless = item.audioQuality === 'LOSSLESS' || item.audioQuality === 'HI_RES_LOSSLESS';
       const coverId = item.album?.cover;
       const artworkURL = coverId
         ? `${TIDAL_RESOURCES_BASE}/${coverId.replace(/-/g, '/')}/1280x1280.jpg`
@@ -80,12 +86,16 @@ export async function searchTidal(
       const artists = (item.artists || []).map((a: any) => a.name).join(', ');
       const title = item.title;
       const artist = artists || item.artist?.name || 'Unknown Artist';
+      const audioModes: string[] = item.audioModes || [];
+      const isAtmos = audioModes.includes('DOLBY_ATMOS');
 
       // Cache metadata for instant stream resolution
       tidalMetadataCache.set(`tidal_${item.id}`, {
         title,
         artist,
         duration: Number(item.duration) || 0,
+        audioModes,
+        atmos: isAtmos,
       });
 
       return {
@@ -95,8 +105,10 @@ export async function searchTidal(
         album: item.album?.title || '',
         duration: Number(item.duration) || 0,
         artworkURL,
-        format: isLossless ? 'flac' : 'mp4',
-        audioQuality: isLossless ? 'LOSSLESS' : 'HIGH',
+        format: 'flac',
+        audioQuality: 'LOSSLESS',
+        audioModes: isAtmos ? ['DOLBY_ATMOS'] : undefined,
+        atmos: isAtmos || undefined,
       };
     });
   } catch (err) {
