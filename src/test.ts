@@ -1,6 +1,7 @@
 import { FlacLibraryManager } from './flacLibrary.js';
 import { searchTracks as searchSaavn, resolveStream as resolveSaavn } from './saavn.js';
 import { config } from './config.js';
+import process from 'node:process';
 
 async function runTests() {
   console.log('🧪 Starting Lossless FLAC BitChord Contract Verification...\n');

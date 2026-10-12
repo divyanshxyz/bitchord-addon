@@ -2,10 +2,10 @@
   "name": "bitchord-addon",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "tsc --skipLibCheck",
+    "start": "node dist/src/index.js",
     "dev": "tsx watch src/index.ts",
     "test": "tsx src/test.ts"
   },

@@ -3,6 +3,7 @@ import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
 import fs from 'node:fs';
 import { Readable } from 'node:stream';
+import process from 'node:process';
 import { config } from './config.js';
 import { BitChordManifest, BitChordTrack } from './types.js';
 import { FlacLibraryManager } from './flacLibrary.js';
