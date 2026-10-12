@@ -14,21 +14,22 @@
     "addon",
     "music",
     "streaming",
-    "jiosaavn"
+    "jiosaavn",
+    "flac"
   ],
   "author": "",
   "license": "MIT",
-  "description": "High-fidelity BitChord music streaming addon powered by JioSaavn",
+  "description": "High-fidelity BitChord music streaming addon",
   "dependencies": {
     "@hono/node-server": "^2.1.4",
-    "crypto-js": "^4.2.0",
-    "hono": "^4.13.13",
-    "music-metadata": "^12.1.1"
-  },
-  "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^26.6.5",
-    "tsx": "^4.23.15",
+    "crypto-js": "^4.2.0",
+    "hono": "^4.13.13",
+    "music-metadata": "^12.1.1",
     "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }
